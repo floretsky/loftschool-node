@@ -1,16 +1,33 @@
-var http = require('http');
+const http = require('http');
+const port = process.env.PORT || '3000';
+const interval = process.env.INTERVAL || '1000';
+const timeout = process.env.TIMEOUT || '3000';
 
-http
-  .createServer(function (request, response) {
-    // Send the HTTP header
-    // HTTP Status: 200 : OK
-    // Content Type: text/plain
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
+let clientId = 0;
 
-    // Send the response body as "Hello World"
-    response.end('Hello World\n');
-  })
-  .listen(8081);
+const server = http.createServer((req, res) => {
+  if (req.method === 'GET') {
+    const client = ++clientId;
 
-// Console will print the message
-console.log('Server running at http://127.0.0.1:8081/');
+    console.log(`${client}: ${new Date().toUTCString()} CONNECTED`);
+
+    const intervalID = setInterval(() => {
+      console.log(`${client}: ${new Date().toUTCString()}`);
+    }, interval);
+
+    setTimeout(() => {
+      clearInterval(intervalID);
+      const time = new Date().toUTCString();
+      console.log(`${client}: ${new Date().toUTCString()} DONE`);
+      res.end(time);
+    }, timeout);
+  } else {
+    res.end('Method unavailable');
+  }
+});
+
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+  console.log(`The interval is ${interval}`);
+  console.log(`The timeout is ${timeout}`);
+});
