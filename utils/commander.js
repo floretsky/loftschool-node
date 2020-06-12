@@ -1,6 +1,6 @@
-const { commander } = require('commander');
+const { program } = require('commander')
 
-module.exports = commander
+module.exports = program
   .version('0.0.1')
   .option('-f, --folder <type>', 'Input folder has been set', './files')
   .option('-o, --output <type>', 'Output folder has been set', './dist')

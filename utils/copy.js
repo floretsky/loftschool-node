@@ -3,24 +3,31 @@ const path = require('path');
 const handleError = require('../helper/handler');
 
 module.exports = function (dist, watcher) {
-  function copyFile(file, cb) {
+  async function copyFile(file, cb) {
     const indexLetter = 0;
     const firstLetter = file.name[indexLetter].toLowerCase();
     const dir = path.join(dist, firstLetter);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
-    fs.copyFile(file.path, path.join(dir, file.name), (err) => {
+
+    await fs.access(dir, async (err) => {
       if (err) {
-        handleError(err);
+        await fs.mkdir(dir, (err) => {
+          if (err) {
+            // folder already exists
+          }
+        });
       }
-      cb();
+      await fs.copyFile(file.path, path.join(dir, file.name), (err) => {
+        if (err) {
+          handleError(err);
+        }
+        cb();
+      });
     });
   }
   watcher.started();
-  return function readFolder(base) {
+  return async function readFolder(base) {
     watcher.startProccess(base);
-    fs.readdir(base, (err, files) => {
+    await fs.readdir(base, (err, files) => {
       if (err) {
         handleError(err);
       }
