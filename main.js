@@ -1,16 +1,31 @@
-var http = require('http');
+const fs = require('fs');
+const path = require('path');
+const Watcher = require('./watcher');
+const commander = require('./utils/commander');
+commander.parse(process.argv);
+const del = require('del');
 
-http
-  .createServer(function (request, response) {
-    // Send the HTTP header
-    // HTTP Status: 200 : OK
-    // Content Type: text/plain
-    response.writeHead(200, { 'Content-Type': 'text/plain' });
-
-    // Send the response body as "Hello World"
-    response.end('Hello World\n');
+const copyFolder = require('./utils/copy')(
+  commander.output,
+  new Watcher(() => {
+    console.log('Sorting is completed!');
+    if (commander.delete) {
+      del(commander.folder).then(() => {
+        console.log('Folder is removed');
+      });
+    }
   })
-  .listen(8081);
+);
 
-// Console will print the message
-console.log('Server running at http://127.0.0.1:8081/');
+if (!fs.existsSync(commander.folder)) {
+  console.log(
+    `Not found input folder. Start command 'node ${path.basename(
+      process.argv[1]
+    )} -h' for help`
+  );
+} else {
+  if (!fs.existsSync(commander.output)) {
+    fs.mkdirSync(commander.output);
+  }
+  copyFolder(commander.folder);
+}
