@@ -12,12 +12,11 @@ module.exports = function (dist, watcher) {
       await fs.mkdir(dir);
       /* Folder is created */
     }
-    await fs
-      .copyFile(file.path, path.join(dir, file.name))
-      .then(() => {
-        /* File created */
-      })
-      .catch((e) => handleError(e));
+    try {
+      await fs.copyFile(file.path, path.join(dir, file.name));
+    } catch (e) {
+      handleError(e);
+    }
   };
 
   watcher.started();
@@ -25,17 +24,21 @@ module.exports = function (dist, watcher) {
   return async function readFolder(base) {
     watcher.startProccess(base);
 
-    const files = await fs.readdir(base);
-    for (const item of files) {
-      const localBase = path.join(base, item);
-      const state = await fs.stat(localBase);
-      if (state.isDirectory()) {
-        await readFolder(localBase);
-      } else {
-        watcher.startProccess(localBase);
-        await copyFile({ name: item, path: localBase });
-        watcher.endProccess(localBase);
+    try {
+      const files = await fs.readdir(base);
+      for (const item of files) {
+        const localBase = path.join(base, item);
+        const state = await fs.stat(localBase);
+        if (state.isDirectory()) {
+          await readFolder(localBase);
+        } else {
+          watcher.startProccess(localBase);
+          await copyFile({ name: item, path: localBase });
+          watcher.endProccess(localBase);
+        }
       }
+    } catch (e) {
+      handleError(e);
     }
 
     watcher.endProccess(base);

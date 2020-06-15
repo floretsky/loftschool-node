@@ -25,7 +25,7 @@ const copyFolder = require('./utils/copy')(
       await fs.mkdir(program.output);
       console.log(`Folder ${program.output} is created`);
     }
-    copyFolder(program.folder);
+    await copyFolder(program.folder);
   } else {
     console.log(
       `Input folder is not found. Start command 'node ${path.basename(
