@@ -121,13 +121,13 @@ router
           });
         }
 
-        let userSchema = await User.findById(user.id);
+        /* let userSchema = await User.findById(user.id);
         if (!userSchema.validPassword(oldPassword)) {
           return res.status(400).json({
             code: 400,
             message: 'Введённый вами старый пароль не совпадает с существующим',
           });
-        }
+        } */
         // Проверяем папку на существование + существование у пользователя аватара
         let upload = path.join('./build', 'upload');
         form.uploadDir = path.join(process.cwd(), upload);
